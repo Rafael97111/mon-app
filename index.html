@@ -2127,6 +2127,45 @@
       border-color:rgba(46,196,182,.3);
       color:#2ec4b6;
     }
+
+    /* Bloc validé — visuel réduit */
+    .block-read-section{ transition:all .3s ease; }
+    .block-read-section.done{
+      opacity:0.4;
+    }
+    .block-read-section.done .block-read-label{
+      color:rgba(46,196,182,.5);
+      font-size:9px;
+    }
+    .block-read-section.done .block-read-label::after{
+      background:rgba(46,196,182,.15);
+    }
+    .block-read-section.done .block-read-exercise{
+      padding:4px 10px !important;
+      margin-bottom:3px;
+      background:rgba(46,196,182,.04);
+      border-color:rgba(46,196,182,.1);
+    }
+    .block-read-section.done .block-read-ex-name{
+      font-size:11px !important;
+      color:rgba(240,236,228,.35) !important;
+      text-decoration:line-through;
+    }
+    .block-read-section.done .block-read-ex-num,
+    .block-read-section.done .block-read-sep,
+    .block-read-section.done .block-read-tag,
+    .block-read-section.done .block-read-video-link{
+      font-size:10px !important;
+      opacity:0.4;
+    }
+    /* Bouton validé — compact */
+    .asp-block-validate-btn.done{
+      padding:6px !important;
+      font-size:11px !important;
+      background:rgba(46,196,182,.08) !important;
+      border-color:rgba(46,196,182,.2) !important;
+      color:rgba(46,196,182,.6) !important;
+    }
   </style>
 </head>
 <body>
@@ -2932,7 +2971,7 @@
       }).join('') : `<div class="block-read-empty">Aucun exercice.</div>`;
       const blockBtnId = 'asp-block-btn-'+ci;
       const blockBtn = `<button class="asp-block-validate-btn" id="${blockBtnId}" onclick="aspToggleBlock(${ci}, '${blockBtnId}')">
-        ✓ Bloc validé
+        ✓ Valider ce bloc
       </button>`;
       return `<div class="block-read-section"><div class="block-read-label">${escHtml(label)}${seriesLabel}</div>${exHtml}${blockBtn}</div>`;
     }).join('');
@@ -5184,16 +5223,26 @@
   function aspToggleBlock(blockIdx, btnId){
     const key = (_aspSeanceId||'') + '-block-' + blockIdx;
     _aspBlocksDone[key] = !_aspBlocksDone[key];
+    const done = _aspBlocksDone[key];
+
+    // Mettre à jour le bouton
     const btn = document.getElementById(btnId);
     if(btn){
-      const done = _aspBlocksDone[key];
       btn.className = 'asp-block-validate-btn' + (done ? ' done' : '');
-      btn.textContent = done ? '✓ Bloc validé' : '✓ Bloc validé';
-      btn.innerHTML = done
-        ? '<span style="color:#2ec4b6">✓ Bloc validé</span>'
-        : '✓ Bloc validé';
+      btn.innerHTML = done ? '✓ Bloc validé' : '✓ Valider ce bloc';
     }
-    // Si tous les blocs sont validés, cocher automatiquement la séance
+
+    // Mettre à jour le visuel du bloc (parent du bouton)
+    const section = btn ? btn.closest('.block-read-section') : null;
+    if(section){
+      if(done){
+        section.classList.add('done');
+      } else {
+        section.classList.remove('done');
+      }
+    }
+
+    // Si tous les blocs sont validés → cocher la séance automatiquement
     const seance = athData && athData.seances.find(s=>s.id===_aspSeanceId);
     if(seance && Array.isArray(seance.content)){
       const total = seance.content.length;
