@@ -2053,6 +2053,64 @@
       .btn{ width:100%; max-width:320px; justify-content:flex-start; padding:18px 22px; }
       .roles-title{ font-size:28px; }
     }
+
+    /* ══ PANEL SÉANCE ATHLÈTE (plein écran) ══ */
+    #ath-seance-panel{
+      position:fixed;inset:0;z-index:500;
+      background:var(--black);
+      transform:translateX(100%);
+      transition:transform .3s cubic-bezier(.25,.8,.25,1);
+      display:flex;flex-direction:column;
+      overflow:hidden;
+    }
+    #ath-seance-panel.open{ transform:translateX(0); }
+    .asp-navbar{
+      display:flex;align-items:center;gap:12px;
+      padding:0 16px;
+      padding-top:env(safe-area-inset-top);
+      height:calc(48px + env(safe-area-inset-top));
+      background:rgba(8,8,8,.95);
+      border-bottom:1px solid rgba(255,255,255,.07);
+      flex-shrink:0;
+    }
+    .asp-back{
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+      border-radius:50px;padding:6px 14px;color:rgba(240,236,228,.7);
+      font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;
+      cursor:pointer;display:flex;align-items:center;gap:6px;
+      transition:background .2s;flex-shrink:0;
+    }
+    .asp-back:hover{ background:rgba(255,255,255,.12); }
+    .asp-title{
+      font-family:'Bebas Neue',sans-serif;font-size:20px;
+      letter-spacing:.06em;color:var(--white);flex:1;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .asp-body{
+      flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+      padding:20px 16px calc(env(safe-area-inset-bottom) + 20px);
+    }
+    .asp-day-badge{
+      display:inline-flex;align-items:center;gap:6px;
+      font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+      color:rgba(240,236,228,.4);margin-bottom:16px;
+    }
+    /* Bouton valider block */
+    .asp-validate-btn{
+      width:100%;padding:14px;border:none;border-radius:14px;
+      background:var(--accent);color:#fff;
+      font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.15em;
+      cursor:pointer;margin-top:20px;
+      transition:opacity .2s,transform .2s;
+      box-shadow:0 4px 24px color-mix(in srgb,var(--accent) 40%,transparent);
+    }
+    .asp-validate-btn:active{ transform:scale(.98);opacity:.9; }
+    .asp-validate-btn.done{
+      background:rgba(46,196,182,.15);
+      border:1px solid rgba(46,196,182,.3);
+      color:#2ec4b6;
+      box-shadow:none;
+    }
   </style>
 </head>
 <body>
@@ -2897,20 +2955,15 @@
 
     const renderCard = ({date, dateKey, seance}, i, isDone) => {
       const dayLabel = DAYS_FR[date.getDay()] + ' ' + date.getDate();
-      const cardId = 'athcard-'+dateKey+'-'+seance.id;
       return `
-      <div class="ath-seance-card" style="border-left-color:${isDone ? 'rgba(46,196,182,.3)' : seance.color};${isDone ? 'opacity:0.55' : ''}" id="${cardId}">
-        <div class="ath-seance-card-hdr" onclick="document.getElementById('${cardId}').classList.toggle('open')">
+      <div class="ath-seance-card" style="border-left-color:${isDone ? 'rgba(46,196,182,.3)' : seance.color};${isDone ? 'opacity:0.55' : ''};cursor:pointer"
+        onclick="openAthSeancePanel('${seance.id}','${dateKey}')">
+        <div class="ath-seance-card-hdr">
           <span class="seance-type-badge ${seance.type}">${seance.type==='ligne'?'Ligne':'Block'}</span>
           <span class="ath-seance-card-title" style="${isDone ? 'text-decoration:line-through;color:rgba(240,236,228,.4)' : ''}">${escHtml(seance.title)}</span>
           ${isDone ? '<span style="font-size:10px;font-weight:700;color:#2ec4b6;margin-left:4px">✓</span>' : ''}
           <span style="font-size:11px;color:rgba(240,236,228,.35);margin-left:auto;margin-right:8px;white-space:nowrap">${dayLabel}</span>
-          <span class="ath-seance-card-chev">▼</span>
-        </div>
-        <div class="ath-seance-card-body">
-          ${seance.type==='ligne'
-            ? `<div style="font-size:13px;color:rgba(240,236,228,.7);line-height:1.7">${escHtml(typeof seance.content==='string'?seance.content:'')}</div>`
-            : athBlockReadHtml(seance)}
+          <span style="color:rgba(240,236,228,.3);font-size:14px">›</span>
         </div>
       </div>`;
     };
@@ -5611,6 +5664,19 @@
   </div>
 
   <!-- backdrop drawer -->
+
+  <!-- Panel séance athlète plein écran -->
+  <div id="ath-seance-panel">
+    <div class="asp-navbar">
+      <button class="asp-back" onclick="closeAthSeancePanel()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Retour
+      </button>
+      <div class="asp-title" id="asp-title">Séance</div>
+    </div>
+    <div class="asp-body" id="asp-body"></div>
+  </div>
+
   <div id="day-drawer-backdrop" onclick="closeDayPage()"></div>
 
   <button id="debug-toggle" onclick="document.getElementById('debug-panel').classList.toggle('visible')">🐛 Debug</button>
