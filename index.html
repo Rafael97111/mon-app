@@ -2111,6 +2111,22 @@
       color:#2ec4b6;
       box-shadow:none;
     }
+
+    /* Bouton valider par bloc */
+    .asp-block-validate-btn{
+      width:100%;padding:10px;border:none;border-radius:10px;
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+      color:rgba(240,236,228,.6);
+      font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;
+      cursor:pointer;margin-top:10px;
+      transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;
+    }
+    .asp-block-validate-btn:active{ transform:scale(.98); }
+    .asp-block-validate-btn.done{
+      background:rgba(46,196,182,.12);
+      border-color:rgba(46,196,182,.3);
+      color:#2ec4b6;
+    }
   </style>
 </head>
 <body>
@@ -2914,7 +2930,11 @@
           ${videoLink}
         </div>`;
       }).join('') : `<div class="block-read-empty">Aucun exercice.</div>`;
-      return `<div class="block-read-section"><div class="block-read-label">${escHtml(label)}${seriesLabel}</div>${exHtml}</div>`;
+      const blockBtnId = 'asp-block-btn-'+ci;
+      const blockBtn = `<button class="asp-block-validate-btn" id="${blockBtnId}" onclick="aspToggleBlock(${ci}, '${blockBtnId}')">
+        ✓ Bloc validé
+      </button>`;
+      return `<div class="block-read-section"><div class="block-read-label">${escHtml(label)}${seriesLabel}</div>${exHtml}${blockBtn}</div>`;
     }).join('');
     return `<div style="padding-top:8px">${rpeHtml}${blocksHtml}</div>`;
   }
@@ -5157,6 +5177,35 @@
 
 
 
+
+  /* Validation par bloc (état local dans la session) */
+  let _aspBlocksDone = {};
+
+  function aspToggleBlock(blockIdx, btnId){
+    const key = (_aspSeanceId||'') + '-block-' + blockIdx;
+    _aspBlocksDone[key] = !_aspBlocksDone[key];
+    const btn = document.getElementById(btnId);
+    if(btn){
+      const done = _aspBlocksDone[key];
+      btn.className = 'asp-block-validate-btn' + (done ? ' done' : '');
+      btn.textContent = done ? '✓ Bloc validé' : '✓ Bloc validé';
+      btn.innerHTML = done
+        ? '<span style="color:#2ec4b6">✓ Bloc validé</span>'
+        : '✓ Bloc validé';
+    }
+    // Si tous les blocs sont validés, cocher automatiquement la séance
+    const seance = athData && athData.seances.find(s=>s.id===_aspSeanceId);
+    if(seance && Array.isArray(seance.content)){
+      const total = seance.content.length;
+      const doneCount = seance.content.filter((_,i)=>_aspBlocksDone[(_aspSeanceId||'')+'-block-'+i]).length;
+      if(doneCount === total && total > 0){
+        const comps = athData.completions || {};
+        const compKey = _aspSeanceId+'|'+_aspDateKey;
+        if(!comps[compKey]) aspToggleComplete();
+      }
+    }
+  }
+
   /* ── PANEL SÉANCE ATHLÈTE ── */
   let _aspSeanceId = null;
   let _aspDateKey = null;
@@ -5166,6 +5215,7 @@
     if(!seance) return;
     _aspSeanceId = seanceId;
     _aspDateKey = dateKey;
+    _aspBlocksDone = {}; // reset état blocs
 
     const DAYS_FR = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
     const d = keyToDate(dateKey);
