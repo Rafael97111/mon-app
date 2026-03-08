@@ -5156,6 +5156,73 @@
   }
 
 
+
+  /* ── PANEL SÉANCE ATHLÈTE ── */
+  let _aspSeanceId = null;
+  let _aspDateKey = null;
+
+  function openAthSeancePanel(seanceId, dateKey){
+    const seance = athData.seances.find(s=>s.id===seanceId);
+    if(!seance) return;
+    _aspSeanceId = seanceId;
+    _aspDateKey = dateKey;
+
+    const DAYS_FR = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+    const d = keyToDate(dateKey);
+    const dayLabel = DAYS_FR[d.getDay()] + ' ' + d.getDate();
+
+    const comps = athData.completions || {};
+    const isDone = !!comps[seanceId+'|'+dateKey];
+
+    let bodyHtml = '<div class="asp-day-badge">📅 '+dayLabel+'</div>';
+    if(seance.type === 'ligne'){
+      bodyHtml += '<div style="font-size:15px;color:rgba(240,236,228,.8);line-height:1.8">'+escHtml(typeof seance.content==='string'?seance.content:'')+'</div>';
+    } else {
+      bodyHtml += athBlockReadHtml(seance);
+    }
+    bodyHtml += '<button class="asp-validate-btn'+(isDone?' done':'')+'" id="asp-validate-btn" onclick="aspToggleComplete()">'+(isDone?'✓ Séance terminée':'Valider la séance')+'</button>';
+
+    document.getElementById('asp-title').textContent = seance.title;
+    document.getElementById('asp-body').innerHTML = bodyHtml;
+    document.getElementById('ath-seance-panel').classList.add('open');
+    document.getElementById('screen-dashboard').style.overflow = 'hidden';
+  }
+
+  function closeAthSeancePanel(){
+    document.getElementById('ath-seance-panel').classList.remove('open');
+    document.getElementById('screen-dashboard').style.overflow = '';
+  }
+
+  async function aspToggleComplete(){
+    if(!_aspSeanceId || !_aspDateKey) return;
+    const comps = athData.completions || {};
+    const key = _aspSeanceId+'|'+_aspDateKey;
+    const isDone = !!comps[key];
+    try {
+      if(isDone){
+        const entry = comps[key];
+        await sbFetch('seance_completions?id=eq.'+entry.id, 'DELETE');
+        delete athData.completions[key];
+      } else {
+        const rows = await sbFetch('seance_completions', 'POST', {
+          athlete_id: athData.athlete.id,
+          seance_id: _aspSeanceId,
+          schedule_date: _aspDateKey
+        });
+        if(!athData.completions) athData.completions = {};
+        athData.completions[key] = { id: rows[0].id, completedAt: rows[0].completed_at };
+      }
+      const newDone = !!athData.completions[key];
+      const btn = document.getElementById('asp-validate-btn');
+      if(btn){
+        btn.className = 'asp-validate-btn'+(newDone?' done':'');
+        btn.textContent = newDone ? '✓ Séance terminée' : 'Valider la séance';
+      }
+      athRenderWeek();
+      athRenderSeances();
+    } catch(err){ console.error('aspToggleComplete:', err); }
+  }
+
   /* ══ DATE HELPER — évite le décalage UTC ══ */
   function dateToKey(d){
     const y = d.getFullYear();
