@@ -4066,7 +4066,7 @@
       </div>
       <button class="athlete-code-copy" onclick="copyAthleteCode('${a.code||''}')">📋 Copier</button>
     </div>`;
-    const gridHtml = `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:0">
+    const gridHtml = `<div class="ath-profil-grid" style="margin-top:0">
       ${fields.map(f=>`<div class="ath-profil-card"><div class="ath-profil-label">${f.label}</div><div class="ath-profil-value">${escHtml(String(f.value))}</div></div>`).join('')}
     </div>`;
     const editHtml = editMode
