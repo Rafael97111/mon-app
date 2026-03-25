@@ -1970,7 +1970,42 @@
       /* Onglets athlète — colle en bas */
 
       /* Panels coach */
-      #athlete-detail-panel, #group-detail-panel{ width:100vw !important; }
+      #athlete-detail-panel, #group-detail-panel{
+        width:100vw !important;
+        overflow-x:hidden !important;
+      }
+      /* Grille profil coach — 1 colonne sur mobile */
+      .adp-profile-grid{
+        grid-template-columns:1fr !important;
+        width:100% !important;
+        overflow:hidden !important;
+      }
+      .adp-profile-card{
+        width:100% !important;
+        box-sizing:border-box !important;
+      }
+      .adp-content{
+        padding:16px 10px 80px !important;
+        max-width:100% !important;
+        overflow-x:hidden !important;
+        box-sizing:border-box !important;
+      }
+      /* Forcer tous les enfants à ne pas dépasser la largeur */
+      .adp-content *{
+        max-width:100% !important;
+        box-sizing:border-box;
+      }
+      /* Hero athlète — en colonne */
+      .adp-hero{
+        flex-direction:column !important;
+        align-items:flex-start !important;
+        gap:12px !important;
+      }
+      /* Tabs en ligne scrollable horizontalement mais contenu en vertical */
+      .adp-tabs{
+        overflow-x:auto !important;
+        overflow-y:hidden !important;
+      }
       .adp-navbar, .gdp-navbar{ padding:0 14px; height:50px; }
       .adp-content{ padding:8px 6px 80px; }
       .adp-tabs{ gap:4px; padding:0 6px; overflow-x:auto; }
