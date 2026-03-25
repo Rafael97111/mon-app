@@ -1693,7 +1693,7 @@
     .ath-seance-card.open .ath-seance-card-body{display:block}
 
     /* Profil athlète */
-    .ath-profil-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+    .ath-profil-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;width:100%;box-sizing:border-box}
     .ath-profil-card{
       background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
       border-radius:12px;padding:14px;
@@ -2026,7 +2026,25 @@
       .week-seance-pill{ font-size:10px !important; padding:6px 6px !important; white-space:normal !important; }
 
       /* Profil */
-      .ath-profil-grid{ grid-template-columns:repeat(2,1fr) !important; }
+      .ath-profil-grid{
+        grid-template-columns:1fr !important;
+        width:100% !important;
+        overflow:hidden !important;
+      }
+      .ath-profil-card{
+        width:100% !important;
+        box-sizing:border-box !important;
+      }
+      /* Tout le panel profil en colonne sans scroll horizontal */
+      #athpanel-profil{
+        overflow-x:hidden !important;
+        width:100% !important;
+        box-sizing:border-box !important;
+      }
+      #athpanel-profil *{
+        max-width:100% !important;
+        box-sizing:border-box;
+      }
       .info-grid{ grid-template-columns:repeat(2,1fr) !important; }
 
       /* Tests */
@@ -3082,6 +3100,12 @@
 
     const renderCard = ({date, dateKey, seance}, i, isDone) => {
       const dayLabel = DAYS_FR[date.getDay()] + ' ' + date.getDate();
+      const comp = comps[seance.id+'|'+dateKey];
+      const rpe = isDone && comp && comp.rpe !== null && comp.rpe !== undefined ? comp.rpe : null;
+      const rpeCol = rpe !== null ? RPE_COLORS[rpe] : '';
+      const rpeBadge = rpe !== null
+        ? `<span style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:${rpeCol};background:${rpeCol}22;border:1px solid ${rpeCol}55;border-radius:6px;padding:1px 7px;margin-right:4px">${rpe}</span>`
+        : '';
       return `
       <div class="ath-seance-card" style="border-left-color:${isDone ? 'rgba(46,196,182,.3)' : seance.color};${isDone ? 'opacity:0.55' : ''};cursor:pointer"
         onclick="openAthSeancePanel('${seance.id}','${dateKey}')">
@@ -3089,8 +3113,11 @@
           <span class="seance-type-badge ${seance.type}">${seance.type==='ligne'?'Ligne':'Block'}</span>
           <span class="ath-seance-card-title" style="${isDone ? 'text-decoration:line-through;color:rgba(240,236,228,.4)' : ''}">${escHtml(seance.title)}</span>
           ${isDone ? '<span style="font-size:10px;font-weight:700;color:#2ec4b6;margin-left:4px">✓</span>' : ''}
-          <span style="font-size:11px;color:rgba(240,236,228,.35);margin-left:auto;margin-right:8px;white-space:nowrap">${dayLabel}</span>
-          <span style="color:rgba(240,236,228,.3);font-size:14px">›</span>
+          <span style="margin-left:auto;display:flex;align-items:center;gap:6px">
+            ${rpeBadge}
+            <span style="font-size:11px;color:rgba(240,236,228,.35);white-space:nowrap">${dayLabel}</span>
+          </span>
+          <span style="color:rgba(240,236,228,.3);font-size:14px;margin-left:6px">›</span>
         </div>
       </div>`;
     };
@@ -4488,7 +4515,7 @@
     let compMap = {};
     try {
       const rows = await sbFetch('seance_completions?athlete_id=eq.'+athlete.id+'&select=*');
-      (rows||[]).forEach(r=>{ compMap[r.seance_id+'|'+r.schedule_date]=true; });
+      (rows||[]).forEach(r=>{ compMap[r.seance_id+'|'+r.schedule_date]={done:true,rpe:r.rpe_ressenti??null}; });
     } catch(e){}
 
     const days = getWeekDays(iwOffset);
@@ -4507,13 +4534,15 @@
       const slots = schedule[key]||[];
 
       const pillsHtml = slots.map(slot=>{
-        const isComp = !!compMap[slot.sid+'|'+key];
+        const compEntry = compMap[slot.sid+'|'+key];
+        const isComp = !!compEntry;
+        const slotRpe = compEntry?.rpe ?? null;
         return `<div class="inline-pill${isComp?' completed':''}"
           style="border-left:3px solid ${slot.color||'#2ec4b6'};background:${isComp?'rgba(46,196,182,.12)':slot.color+'22'}"
           title="${escHtml(slot.title)}"
           onclick="openDayPageFromInline('${key}','${DAYS_FR[i]} ${d.getDate()}',event)">
           <span style="${isComp?'text-decoration:line-through;text-decoration-color:rgba(46,196,182,.7);color:rgba(240,236,228,.4)':''}">${escHtml(slot.title)}</span>
-          ${isComp ? '<div style="font-size:8px;font-weight:700;color:#2ec4b6;margin-top:2px">✓ Complété</div>' : ''}
+          ${isComp ? '<div style="font-size:8px;font-weight:700;color:#2ec4b6;margin-top:2px">✓ Complété'+(slotRpe!==null?' · RPE '+slotRpe:'')+'</div>' : ''}
         </div>`;
       }).join('');
 
@@ -5529,7 +5558,7 @@
     } catch(e){}
 
     const compMap = {};
-    freshCompletions.forEach(r=>{ compMap[r.seance_id+'|'+r.schedule_date]=true; });
+    freshCompletions.forEach(r=>{ compMap[r.seance_id+'|'+r.schedule_date]={done:true,rpe:r.rpe_ressenti??null}; });
 
     const days = getWeekDays(weekOffset);
     const DAYS_FR = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
@@ -5546,10 +5575,12 @@
       const slots = schedule[key]||[];
 
       const pillsHtml = slots.map(slot=>{
-        const isComp = !!compMap[slot.sid+'|'+key];
+        const compEntry = compMap[slot.sid+'|'+key];
+        const isComp = !!compEntry;
+        const slotRpe = compEntry?.rpe ?? null;
         return `<div class="week-seance-pill${isComp?' completed':''}" style="--pill-color:${slot.color||'#2ec4b6'};border-left-color:${isComp?'#2ec4b6':slot.color||'#2ec4b6'}">
           <span class="pill-title${isComp?' done':''}">${escHtml(slot.title)}</span>
-          ${isComp ? '<div class="pill-comp-row">✓ Complété</div>' : ''}
+          ${isComp ? '<div class="pill-comp-row">✓ Complété'+(slotRpe!==null?' · RPE <strong>'+slotRpe+'</strong>':'')+'</div>' : ''}
         </div>`;
       }).join('');
 
