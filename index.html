@@ -250,5 +250,241 @@
   </div>
 
   <script src="js/app.js"></script>
+
+  <div id="athlete-detail-panel">
+    <div class="adp-navbar">
+      <button class="adp-back" onclick="closeAthleteDetail()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Retour
+      </button>
+      <span class="adp-nav-name" id="adp-nav-name"></span>
+    </div>
+    <div class="adp-content">
+      <div class="adp-hero">
+        <div class="adp-big-avatar" id="adp-avatar"></div>
+        <div class="adp-hero-info">
+          <div class="adp-hero-name" id="adp-name"></div>
+          <div class="adp-hero-sport" id="adp-sport"></div>
+        </div>
+      </div>
+      <div class="adp-tabs">
+        <button class="adp-tab active" onclick="switchAthleteTab('seances',this)"><span class="adp-tab-icon">🏋️</span>Séances</button>
+        <button class="adp-tab" onclick="switchAthleteTab('tests',this)"><span class="adp-tab-icon">📊</span>Tests</button>
+        <button class="adp-tab" onclick="switchAthleteTab('profil',this)"><span class="adp-tab-icon">👤</span>Profil</button>
+      </div>
+      <div class="adp-panel active" id="adp-panel-seances">
+        <div class="inline-week" id="inline-week-widget">
+          <div class="inline-week-header">
+            <div class="inline-week-title" id="iw-title">Semaine</div>
+            <div class="inline-week-nav">
+              <button class="inline-week-btn" onclick="shiftInlineWeek(-1)">◀</button>
+              <span class="inline-week-range" id="iw-range"></span>
+              <button class="inline-week-btn" onclick="shiftInlineWeek(1)">▶</button>
+            </div>
+          </div>
+          <div class="inline-week-grid" id="iw-grid"></div>
+        </div>
+        <div class="seances-header">
+          <div class="seances-title">Séances</div>
+          <div class="seance-type-chooser" id="seance-type-chooser">
+            <button class="add-btn" onclick="toggleSeanceChooser(event)">
+              <span class="plus">+</span> Ajouter une séance
+            </button>
+            <div class="seance-type-dropdown" id="seance-type-dropdown">
+              <button class="seance-type-opt" onclick="createSeance('ligne')">
+                <span class="seance-type-icon">📝</span>
+                <div class="seance-type-text">
+                  <div class="seance-type-name">Ligne</div>
+                  <div class="seance-type-desc">Espace libre — écrivez votre séance comme vous voulez</div>
+                </div>
+              </button>
+              <button class="seance-type-opt" onclick="createSeance('block')">
+                <span class="seance-type-icon">🔲</span>
+                <div class="seance-type-text">
+                  <div class="seance-type-name">Block</div>
+                  <div class="seance-type-desc">Circuits &amp; supersets — groupez vos exercices en blocs</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="seances-list" id="seances-list">
+          <div class="adp-empty">
+            <div class="adp-empty-icon">🏋️</div>
+            <div class="adp-empty-title">Aucune séance</div>
+            Cliquez sur "+ Ajouter une séance" pour commencer.
+          </div>
+        </div>
+      </div>
+      <div class="adp-panel" id="adp-panel-tests">
+        <div class="tests-header">
+          <div class="tests-title">Tests</div>
+          <button class="add-btn" onclick="showTestForm()">
+            <span class="plus">+</span> Ajouter un test
+          </button>
+        </div>
+        <div id="test-add-form-wrap"></div>
+        <div class="tests-list" id="tests-list">
+          <div class="adp-empty">
+            <div class="adp-empty-icon">📊</div>
+            <div class="adp-empty-title">Aucun test</div>
+            Cliquez sur "+ Ajouter un test" pour commencer.
+          </div>
+        </div>
+      </div>
+      <div class="adp-panel" id="adp-panel-profil">
+        <div id="adp-profile-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ WEEK PANEL ══ -->
+  <div id="week-panel">
+    <div class="week-navbar">
+      <button class="week-back" onclick="closeWeekPanel()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Retour
+      </button>
+      <span class="week-title" id="week-panel-title">Semaine</span>
+    </div>
+    <div class="week-content">
+      <div class="week-header-row">
+        <div class="week-athlete-info">
+          <div class="week-athlete-name" id="week-athlete-name"></div>
+          <div class="week-athlete-sub" id="week-athlete-sub"></div>
+        </div>
+        <div class="week-nav">
+          <button class="week-nav-btn" onclick="shiftWeek(-1)">◀</button>
+          <span class="week-label" id="week-range-label"></span>
+          <button class="week-nav-btn" onclick="shiftWeek(1)">▶</button>
+        </div>
+      </div>
+      <div class="week-grid" id="week-grid"></div>
+    </div>
+  </div>
+
+  <!-- ══ DAY DETAIL PAGE ══ -->
+  <div id="day-detail-panel">
+    <div class="ddp-navbar">
+      <button class="ddp-back" onclick="closeDayPage()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Retour à la semaine
+      </button>
+      <span class="ddp-nav-title" id="ddp-nav-title"></span>
+    </div>
+    <div class="ddp-content">
+      <div class="ddp-day-title" id="ddp-day-title"></div>
+      <div class="ddp-day-sub" id="ddp-day-sub"></div>
+      <div id="ddp-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ LIGNE CREATION MODAL ══ -->
+  <div class="ligne-modal-overlay" id="ligne-modal-overlay">
+    <div class="ligne-modal">
+      <div class="modal-title">Nouvelle séance — Ligne</div>
+      <div class="modal-sub">Donnez un nom à votre séance et rédigez-la librement</div>
+      <div class="modal-fields" style="margin-bottom:0">
+        <div class="field-wrap">
+          <label class="field-label">Nom de la séance</label>
+          <input class="field-input" id="lm-title" type="text" placeholder="Ex : Séance force, Cardio matinal…"/>
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Couleur</label>
+          <div class="color-picker-row" id="lm-color-picker"></div>
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Contenu de la séance</label>
+          <textarea class="seance-textarea" id="lm-content" placeholder="Écrivez votre séance librement…&#10;Ex: 3x10 squats @ 80kg&#10;    30s repos&#10;4x200m sprint…" style="min-height:180px"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top:22px">
+        <button class="modal-cancel" onclick="closeLigneModal()">Annuler</button>
+        <button class="modal-confirm" onclick="saveLigneModal()">Créer la séance</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BLOCK CREATION MODAL ══ -->
+  <div class="block-modal-overlay" id="block-modal-overlay">
+    <div class="block-modal">
+      <div class="bm-header">
+        <div class="bm-step-indicator" id="bm-step-indicator"></div>
+        <div class="modal-title" id="bm-modal-title">Nouvelle séance — Block</div>
+        <div class="modal-sub" id="bm-modal-sub">Configurez votre séance</div>
+      </div>
+      <div class="bm-body" id="bm-body"></div>
+      <div class="bm-footer">
+        <button class="bm-cancel-btn" onclick="closeBlockModal()">Annuler</button>
+        <button class="bm-back-btn" id="bm-back-btn" onclick="bmPrevStep()" style="display:none">← Retour</button>
+        <button class="bm-next-btn" id="bm-next-btn" onclick="bmNextStep()">Suivant →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TEST GRAPH MODAL ══ -->
+  <div class="test-graph-overlay" id="test-graph-overlay">
+    <div class="test-graph-modal">
+      <div class="tg-header">
+        <div>
+          <div class="tg-title" id="tg-title">Test</div>
+          <div class="tg-stats" id="tg-stats"></div>
+        </div>
+        <button class="tg-close" onclick="closeTestGraph()">✕</button>
+      </div>
+      <div class="tg-body">
+        <div class="tg-canvas-wrap">
+          <canvas id="tg-canvas"></canvas>
+        </div>
+        <div style="height:1px;background:rgba(255,255,255,.06)"></div>
+        <div class="tg-add-row">
+          <div class="test-add-field" style="flex:1">
+            <span class="test-add-label">Nouveau score</span>
+            <input class="test-add-input" id="tg-score-input" type="text" placeholder="Ex : 125kg, 18.2…"/>
+          </div>
+          <button class="test-add-submit" onclick="submitNewScore()">+ Ajouter</button>
+        </div>
+        <div class="tg-entries" id="tg-entries"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SEANCE ACTION MENU ══ -->
+  <div class="seance-action-menu" id="seance-action-menu">
+    <button class="sam-item" onclick="samEdit()"><span class="sam-icon">✏️</span>Modifier</button>
+    <button class="sam-item" onclick="samAddToWeek()"><span class="sam-icon">📅</span>Ajouter à la semaine</button>
+    <div class="sam-sep"></div>
+    <button class="sam-item danger" onclick="samDelete()"><span class="sam-icon">🗑️</span>Supprimer</button>
+  </div>
+
+  <!-- Bulle RPE ressenti -->
+  <div id="rpe-bubble-overlay" onclick="rpeOverlayClick(event)">
+    <div class="rpe-bubble">
+      <div class="rpe-bubble-title">Comment s'est passée la séance ?</div>
+      <div class="rpe-bubble-sub">Donne un RPE ressenti de 0 à 10</div>
+      <div class="rpe-grid" id="rpe-grid"></div>
+      <div class="rpe-bubble-label" id="rpe-label">—</div>
+      <button class="rpe-bubble-confirm" id="rpe-confirm" onclick="rpeConfirm()" disabled>Confirmer</button>
+      <button class="rpe-bubble-skip" onclick="rpeSkip()">Passer</button>
+    </div>
+  </div>
+
+  <!-- Panel séance athlète plein écran -->
+  <div id="ath-seance-panel">
+    <div class="asp-navbar">
+      <button class="asp-back" onclick="closeAthSeancePanel()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Retour
+      </button>
+      <div class="asp-title" id="asp-title">Séance</div>
+    </div>
+    <div class="asp-body" id="asp-body"></div>
+  </div>
+
+  <div id="day-drawer-backdrop" onclick="closeDayPage()"></div>
+
+  <button id="debug-toggle" onclick="document.getElementById('debug-panel').classList.toggle('visible')">🐛 Debug</button>
+  <div id="debug-panel"></div>
+
 </body>
 </html>
