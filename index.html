@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <title>App</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- ══ S1: RÔLES ══ -->
+  <div class="screen active" id="screen-roles">
+    <div class="container">
+      <div class="header">
+        <span class="eyebrow">Bienvenue</span>
+        <h1>Qui êtes-vous ?</h1>
+        <div class="divider"></div>
+        <p class="subtitle">Sélectionnez votre rôle pour continuer</p>
+      </div>
+      <div class="buttons">
+        <button class="btn btn-coach" onclick="goToLogin('coach')"><span class="btn-icon">📋</span><span class="btn-label">Coach</span><span class="btn-sub">Suivi équipe</span></button>
+        <button class="btn btn-athlete" onclick="goToLogin('athlete')"><span class="btn-icon">⚡</span><span class="btn-label">Athlete</span><span class="btn-sub">Performance</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ S2: CONNEXION ══ -->
+  <div class="screen" id="screen-login">
+    <div class="card">
+      <button class="back-btn" onclick="showScreen('screen-roles')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Retour</button>
+      <div class="card-header">
+        <div class="role-badge" id="login-badge"></div>
+        <div class="card-title">Connexion</div>
+        <div class="card-subtitle">Entrez vos identifiants pour accéder à votre espace</div>
+      </div>
+      <div class="fields">
+        <div class="field-wrap"><label class="field-label">Identifiant</label><input class="field-input" id="login-user" type="text" placeholder="Votre identifiant" autocomplete="username" onkeydown="if(event.key==='Enter')handleLogin()"/></div>
+        <div class="field-wrap"><label class="field-label">Mot de passe</label><input class="field-input" id="login-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()"/></div>
+      </div>
+      <div class="remember-row">
+        <input type="checkbox" class="remember-checkbox" id="remember-me" checked/>
+        <label class="remember-label" for="remember-me">Se souvenir de moi</label>
+      </div>
+      <div class="msg" id="login-msg"></div>
+      <button class="submit-btn" id="login-submit-btn" onclick="handleLogin()">Se connecter</button>
+      <div class="link-row">Pas encore de compte ?&nbsp;<a onclick="goToRegister()">Créer un compte</a></div>
+    </div>
+  </div>
+
+  <!-- ══ S3: INSCRIPTION ══ -->
+  <div class="screen" id="screen-register">
+    <div class="card">
+      <button class="back-btn" onclick="showScreen('screen-login')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Retour à la connexion</button>
+      <div class="card-header">
+        <div class="role-badge" id="register-badge"></div>
+        <div class="card-title">Créer un compte</div>
+        <div class="card-subtitle">Remplissez le formulaire pour rejoindre la plateforme</div>
+      </div>
+      <div class="fields">
+        <div class="two-col">
+          <div class="field-wrap"><label class="field-label">Prénom</label><input class="field-input" id="reg-first" type="text" placeholder="Jean"/></div>
+          <div class="field-wrap"><label class="field-label">Nom</label><input class="field-input" id="reg-last" type="text" placeholder="Dupont"/></div>
+        </div>
+        <div class="field-wrap"><label class="field-label">Identifiant</label><input class="field-input" id="reg-user" type="text" placeholder="Choisissez un identifiant"/></div>
+        <div class="field-wrap"><label class="field-label">Mot de passe</label><input class="field-input" id="reg-pass" type="password" placeholder="••••••••"/></div>
+        <div class="field-wrap"><label class="field-label">Confirmer le mot de passe</label><input class="field-input" id="reg-pass2" type="password" placeholder="••••••••"/></div>
+      </div>
+      <div class="msg" id="register-msg"></div>
+      <button class="submit-btn" id="register-submit-btn" onclick="handleRegister()">Créer mon compte</button>
+      <div class="link-row">Déjà un compte ?&nbsp;<a onclick="showScreen('screen-login')">Se connecter</a></div>
+    </div>
+  </div>
+
+  <!-- ══ S4: DASHBOARD ══ -->
+  <div class="screen" id="screen-dashboard">
+    <div class="dashboard">
+      <nav class="navbar">
+        <div class="navbar-left">
+          <span class="nav-logo">PLATFORM</span>
+          <span class="nav-role-badge" id="nav-role-badge"></span>
+        </div>
+        <div class="navbar-right">
+          <button class="menu-trigger" onclick="toggleMenu()">
+            <div class="avatar" id="nav-avatar">?</div>
+            <span id="nav-username">Utilisateur</span>
+            <svg class="chevron" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="dropdown" id="dropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name" id="dd-fullname">—</div>
+              <div class="dropdown-role" id="dd-role">—</div>
+            </div>
+            <button class="dropdown-item" onclick="switchSection('tableau-de-bord')"><span class="di-icon">🏠</span>Tableau de bord</button>
+            <button class="dropdown-item" onclick="switchSection('profil')"><span class="di-icon">👤</span>Profil</button>
+            <button class="dropdown-item" onclick="switchSection('parametres')"><span class="di-icon">⚙️</span>Paramètres</button>
+            <button class="dropdown-item" onclick="switchSection('abonnement')"><span class="di-icon">💳</span>Abonnement</button>
+            <div class="dropdown-sep"></div>
+            <button class="dropdown-item logout" onclick="handleLogout()"><span class="di-icon">🚪</span>Se déconnecter</button>
+          </div>
+        </div>
+      </nav>
+      <div class="dash-content">
+        <div class="section-panel active" id="panel-tableau-de-bord"></div>
+        <div class="section-panel" id="panel-profil">
+          <div class="section-title">Profil</div>
+          <div class="section-sub">Vos informations personnelles</div>
+          <div class="info-grid">
+            <div class="info-card"><div class="info-card-label">Prénom</div><div class="info-card-value" id="prof-first">—</div></div>
+            <div class="info-card"><div class="info-card-label">Nom</div><div class="info-card-value" id="prof-last">—</div></div>
+            <div class="info-card"><div class="info-card-label">Identifiant</div><div class="info-card-value" id="prof-user">—</div></div>
+            <div class="info-card"><div class="info-card-label">Rôle</div><div class="info-card-value" id="prof-role">—</div></div>
+          </div>
+          <div id="coach-username-edit-wrap" style="margin-top:20px"></div>
+          <div id="profil-chart-section"></div>
+        </div>
+        <div class="section-panel" id="panel-parametres">
+          <div class="section-title">Paramètres</div>
+          <div class="section-sub">Gérez les préférences de votre compte</div>
+          <div class="wide-card"><h3>Sécurité</h3><p>La modification du mot de passe sera disponible prochainement.</p></div>
+          <div class="wide-card"><h3>Notifications</h3><p>La gestion des notifications sera disponible prochainement.</p></div>
+        </div>
+        <div class="section-panel" id="panel-abonnement">
+          <div class="section-title">Abonnement</div>
+          <div class="section-sub">Gérez votre plan et votre facturation</div>
+          <div class="wide-card"><div class="plan-badge">Plan Gratuit</div><h3>Fonctionnalités incluses</h3><p>Accès de base à la plateforme.</p></div>
+          <div class="wide-card"><h3>Mettre à niveau</h3><p>Les options d'abonnement payant seront disponibles prochainement.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ GROUP DETAIL PANEL (slides from right) ══ -->
+  <div id="group-detail-panel">
+    <div class="gdp-stripe" id="gdp-stripe"></div>
+    <div class="gdp-navbar">
+      <button class="gdp-back" onclick="closeGroupDetail()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Retour aux groupes
+      </button>
+      <div class="gdp-title-row">
+        <span class="gdp-emoji-sm" id="gdp-emoji-sm"></span>
+        <span id="gdp-nav-name"></span>
+      </div>
+    </div>
+
+    <div class="gdp-content">
+      <div class="gdp-header">
+        <div class="gdp-header-left">
+          <div class="gdp-big-emoji" id="gdp-big-emoji">👥</div>
+          <div class="gdp-group-name" id="gdp-group-name">Groupe</div>
+          <div class="gdp-group-meta">
+            <span class="gdp-color-dot" id="gdp-color-dot"></span>
+            <span id="gdp-group-date"></span>
+          </div>
+        </div>
+        <div class="gdp-stats">
+          <div class="gdp-stat">
+            <div class="gdp-stat-val" id="gdp-stat-members">0</div>
+            <div class="gdp-stat-lbl">Membres</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gdp-members-header">
+        <div class="gdp-members-label">
+          Membres <span class="cs-count" id="gdp-count">0</span>
+        </div>
+        <button class="add-btn" onclick="openGroupMemberModal()">
+          <span class="plus">+</span> Ajouter un athlète
+        </button>
+      </div>
+      <div class="members-list" id="gdp-members-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL GROUPE ══ -->
+  <div class="modal-overlay" id="modal-group">
+    <div class="modal">
+      <div class="modal-title">Nouveau groupe</div>
+      <div class="modal-sub">Créez un groupe pour organiser vos athlètes</div>
+      <div class="modal-fields">
+        <div class="field-wrap"><label class="field-label">Nom du groupe</label><input class="field-input" id="mg-name" type="text" placeholder="Ex : Équipe A, Juniors…"/></div>
+        <div class="field-wrap"><label class="field-label">Emoji / icône</label><input class="field-input" id="mg-emoji" type="text" placeholder="🏃 🏋️ ⚽ 🏊…" maxlength="4"/></div>
+        <div class="field-wrap"><label class="field-label">Couleur</label><div class="color-picker" id="mg-color-picker"></div></div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeModal('modal-group')">Annuler</button>
+        <button class="modal-confirm" onclick="confirmGroup()">Créer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL ATHLÈTE (tableau de bord) ══ -->
+  <div class="modal-overlay" id="modal-athlete">
+    <div class="modal modal-wide">
+      <div class="modal-title">Nouvel athlète</div>
+      <div class="modal-sub">Renseignez le profil de l'athlète</div>
+      <div class="modal-fields">
+        <div class="two-col">
+          <div class="field-wrap"><label class="field-label">Prénom</label><input class="field-input" id="ma-first" type="text" placeholder="Jean"/></div>
+          <div class="field-wrap"><label class="field-label">Nom</label><input class="field-input" id="ma-last" type="text" placeholder="Dupont"/></div>
+        </div>
+        <div class="three-col">
+          <div class="field-wrap"><label class="field-label">Âge</label><input class="field-input" id="ma-age" type="number" min="5" max="99" placeholder="25"/></div>
+          <div class="field-wrap"><label class="field-label">Taille (cm)</label><input class="field-input" id="ma-height" type="number" min="100" max="250" placeholder="175"/></div>
+          <div class="field-wrap"><label class="field-label">Poids (kg)</label><input class="field-input" id="ma-weight" type="number" min="20" max="300" placeholder="70"/></div>
+        </div>
+        <div class="field-wrap"><label class="field-label">Sport / discipline</label><input class="field-input" id="ma-sport" type="text" placeholder="Ex : Sprint, Natation, Football…"/></div>
+        <div class="field-wrap">
+          <label class="field-label">Sexe</label>
+          <div class="sexe-picker">
+            <button type="button" class="sexe-btn" id="sexe-m" onclick="selectSexe('M')">♂ Homme</button>
+            <button type="button" class="sexe-btn" id="sexe-f" onclick="selectSexe('F')">♀ Femme</button>
+            <button type="button" class="sexe-btn" id="sexe-a" onclick="selectSexe('A')">◈ Autre</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeModal('modal-athlete')">Annuler</button>
+        <button class="modal-confirm" onclick="confirmAthlete()">Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL MEMBRE DU GROUPE ══ -->
+  <div class="modal-overlay" id="modal-group-member">
+    <div class="modal">
+      <div class="modal-title">Ajouter un athlète</div>
+      <div class="modal-sub" id="mgm-sub">Ajoutez un athlète au groupe</div>
+      <div class="modal-fields">
+        <div class="two-col">
+          <div class="field-wrap"><label class="field-label">Prénom</label><input class="field-input" id="mgm-first" type="text" placeholder="Jean"/></div>
+          <div class="field-wrap"><label class="field-label">Nom</label><input class="field-input" id="mgm-last" type="text" placeholder="Dupont"/></div>
+        </div>
+        <div class="field-wrap"><label class="field-label">Sport / discipline</label><input class="field-input" id="mgm-sport" type="text" placeholder="Ex : Sprint, Natation…"/></div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeModal('modal-group-member')">Annuler</button>
+        <button class="modal-confirm" onclick="confirmGroupMember()">Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+
+  <div id="athlete-detail-panel">
+    <div class="adp-navbar">
+      <button class="adp-back" onclick="closeAthleteDetail()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Retour
+      </button>
+      <span class="adp-nav-name" id="adp-nav-name"></span>
+    </div>
+    <div class="adp-content">
+      <div class="adp-hero">
+        <div class="adp-big-avatar" id="adp-avatar"></div>
+        <div class="adp-hero-info">
+          <div class="adp-hero-name" id="adp-name"></div>
+          <div class="adp-hero-sport" id="adp-sport"></div>
+        </div>
+      </div>
+      <div class="adp-tabs">
+        <button class="adp-tab active" onclick="switchAthleteTab('seances',this)"><span class="adp-tab-icon">🏋️</span>Séances</button>
+        <button class="adp-tab" onclick="switchAthleteTab('tests',this)"><span class="adp-tab-icon">📊</span>Tests</button>
+        <button class="adp-tab" onclick="switchAthleteTab('profil',this)"><span class="adp-tab-icon">👤</span>Profil</button>
+        <button class="adp-tab" onclick="switchAthleteTab('charge',this)"><span class="adp-tab-icon">⚡</span>Charge</button>
+      </div>
+      <div class="adp-panel active" id="adp-panel-seances">
+        <div class="inline-week" id="inline-week-widget">
+          <div class="inline-week-header">
+            <div class="inline-week-title" id="iw-title">Semaine</div>
+            <div class="inline-week-nav">
+              <button class="inline-week-btn" onclick="shiftInlineWeek(-1)">◀</button>
+              <span class="inline-week-range" id="iw-range"></span>
+              <button class="inline-week-btn" onclick="shiftInlineWeek(1)">▶</button>
+            </div>
+          </div>
+          <div class="inline-week-grid" id="iw-grid"></div>
+        </div>
+        <div class="seances-header">
+          <div class="seances-title">Séances</div>
+          <div class="seance-type-chooser" id="seance-type-chooser">
+            <button class="add-btn" onclick="toggleSeanceChooser(event)">
+              <span class="plus">+</span> Ajouter une séance
+            </button>
+            <div class="seance-type-dropdown" id="seance-type-dropdown">
+              <button class="seance-type-opt" onclick="createSeance('ligne')">
+                <span class="seance-type-icon">📝</span>
+                <div class="seance-type-text">
+                  <div class="seance-type-name">Ligne</div>
+                  <div class="seance-type-desc">Espace libre — écrivez votre séance comme vous voulez</div>
+                </div>
+              </button>
+              <button class="seance-type-opt" onclick="createSeance('block')">
+                <span class="seance-type-icon">🔲</span>
+                <div class="seance-type-text">
+                  <div class="seance-type-name">Block</div>
+                  <div class="seance-type-desc">Circuits &amp; supersets — groupez vos exercices en blocs</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="seances-list" id="seances-list">
+          <div class="adp-empty">
+            <div class="adp-empty-icon">🏋️</div>
+            <div class="adp-empty-title">Aucune séance</div>
+            Cliquez sur "+ Ajouter une séance" pour commencer.
+          </div>
+        </div>
+        <div style="margin-top:28px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(240,236,228,.3);margin-bottom:10px">Séances complétées récemment</div>
+          <div id="adp-completion-list"></div>
+        </div>
+      </div>
+      <div class="adp-panel" id="adp-panel-tests">
+        <div class="tests-header">
+          <div class="tests-title">Tests</div>
+          <button class="add-btn" onclick="showTestForm()">
+            <span class="plus">+</span> Ajouter un test
+          </button>
+        </div>
+        <div id="test-add-form-wrap"></div>
+        <div class="tests-list" id="tests-list">
+          <div class="adp-empty">
+            <div class="adp-empty-icon">📊</div>
+            <div class="adp-empty-title">Aucun test</div>
+            Cliquez sur "+ Ajouter un test" pour commencer.
+          </div>
+        </div>
+      </div>
+      <div class="adp-panel" id="adp-panel-profil">
+        <div id="adp-profile-grid"></div>
+      </div>
+      <div class="adp-panel" id="adp-panel-charge">
+        <div id="charge-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ WEEK PANEL ══ -->
+  <div id="week-panel">
+    <div class="week-navbar">
+      <button class="week-back" onclick="closeWeekPanel()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Retour
+      </button>
+      <span class="week-title" id="week-panel-title">Semaine</span>
+    </div>
+    <div class="week-content">
+      <div class="week-header-row">
+        <div class="week-athlete-info">
+          <div class="week-athlete-name" id="week-athlete-name"></div>
+          <div class="week-athlete-sub" id="week-athlete-sub"></div>
+        </div>
+        <div class="week-nav">
+          <button class="week-nav-btn" onclick="shiftWeek(-1)">◀</button>
+          <span class="week-label" id="week-range-label"></span>
+          <button class="week-nav-btn" onclick="shiftWeek(1)">▶</button>
+        </div>
+      </div>
+      <div class="week-grid" id="week-grid"></div>
+    </div>
+  </div>
+
+  <!-- ══ DAY DETAIL PAGE ══ -->
+  <div id="day-detail-panel">
+    <div class="ddp-navbar">
+      <button class="ddp-back" onclick="closeDayPage()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Retour à la semaine
+      </button>
+      <span class="ddp-nav-title" id="ddp-nav-title"></span>
+    </div>
+    <div class="ddp-content">
+      <div class="ddp-day-title" id="ddp-day-title"></div>
+      <div class="ddp-day-sub" id="ddp-day-sub"></div>
+      <div id="ddp-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ LIGNE CREATION MODAL ══ -->
+  <div class="ligne-modal-overlay" id="ligne-modal-overlay">
+    <div class="ligne-modal">
+      <div class="modal-title">Nouvelle séance — Ligne</div>
+      <div class="modal-sub">Donnez un nom à votre séance et rédigez-la librement</div>
+      <div class="modal-fields" style="margin-bottom:0">
+        <div class="field-wrap">
+          <label class="field-label">Nom de la séance</label>
+          <input class="field-input" id="lm-title" type="text" placeholder="Ex : Séance force, Cardio matinal…"/>
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Couleur</label>
+          <div class="color-picker-row" id="lm-color-picker"></div>
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Contenu de la séance</label>
+          <textarea class="seance-textarea" id="lm-content" placeholder="Écrivez votre séance librement…&#10;Ex: 3x10 squats @ 80kg&#10;    30s repos&#10;4x200m sprint…" style="min-height:180px"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top:22px">
+        <button class="modal-cancel" onclick="closeLigneModal()">Annuler</button>
+        <button class="modal-confirm" onclick="saveLigneModal()">Créer la séance</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BLOCK CREATION MODAL ══ -->
+  <div class="block-modal-overlay" id="block-modal-overlay">
+    <div class="block-modal">
+      <div class="bm-header">
+        <div class="bm-step-indicator" id="bm-step-indicator"></div>
+        <div class="modal-title" id="bm-modal-title">Nouvelle séance — Block</div>
+        <div class="modal-sub" id="bm-modal-sub">Configurez votre séance</div>
+      </div>
+      <div class="bm-body" id="bm-body"></div>
+      <div class="bm-footer">
+        <button class="bm-cancel-btn" onclick="closeBlockModal()">Annuler</button>
+        <button class="bm-back-btn" id="bm-back-btn" onclick="bmPrevStep()" style="display:none">← Retour</button>
+        <button class="bm-next-btn" id="bm-next-btn" onclick="bmNextStep()">Suivant →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TEST GRAPH MODAL ══ -->
+  <div class="test-graph-overlay" id="test-graph-overlay">
+    <div class="test-graph-modal">
+      <div class="tg-header">
+        <div>
+          <div class="tg-title" id="tg-title">Test</div>
+          <div class="tg-stats" id="tg-stats"></div>
+        </div>
+        <button class="tg-close" onclick="closeTestGraph()">✕</button>
+      </div>
+      <div class="tg-body">
+        <div class="tg-canvas-wrap">
+          <canvas id="tg-canvas"></canvas>
+        </div>
+        <div style="height:1px;background:rgba(255,255,255,.06)"></div>
+        <div class="tg-add-row">
+          <div class="test-add-field" style="flex:1">
+            <span class="test-add-label">Nouveau score</span>
+            <input class="test-add-input" id="tg-score-input" type="text" placeholder="Ex : 125kg, 18.2…"/>
+          </div>
+          <button class="test-add-submit" onclick="submitNewScore()">+ Ajouter</button>
+        </div>
+        <div class="tg-entries" id="tg-entries"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SEANCE ACTION MENU ══ -->
+  <div class="seance-action-menu" id="seance-action-menu">
+    <button class="sam-item" onclick="samEdit()"><span class="sam-icon">✏️</span>Modifier</button>
+    <button class="sam-item" onclick="samAddToWeek()"><span class="sam-icon">📅</span>Ajouter à la semaine</button>
+    <div class="sam-sep"></div>
+    <button class="sam-item danger" onclick="samDelete()"><span class="sam-icon">🗑️</span>Supprimer</button>
+  </div>
+
+  <!-- Bulle RPE ressenti -->
+  <div id="rpe-bubble-overlay">
+    <div class="rpe-bubble">
+      <div class="rpe-bubble-title">Comment s'est passée la séance ?</div>
+      <div class="rpe-bubble-sub">Donne un RPE ressenti de 0 à 10</div>
+      <div class="rpe-grid" id="rpe-grid"></div>
+      <div class="rpe-bubble-label" id="rpe-label">—</div>
+      <div class="rpe-duration-row">
+        <span class="rpe-duration-label">Durée</span>
+        <input class="rpe-duration-input" id="rpe-duration" type="number" min="1" max="600" placeholder="45" oninput="rpeCheckConfirm()"/>
+        <span class="rpe-duration-unit">min</span>
+      </div>
+      <button class="rpe-bubble-confirm" id="rpe-confirm" onclick="rpeConfirm()" disabled>Confirmer</button>
+    </div>
+  </div>
+
+  <!-- Panel séance athlète plein écran -->
+  <div id="ath-seance-panel">
+    <div class="asp-navbar">
+      <button class="asp-back" onclick="closeAthSeancePanel()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Retour
+      </button>
+      <div class="asp-title" id="asp-title">Séance</div>
+    </div>
+    <div class="asp-body" id="asp-body"></div>
+  </div>
+
+  <div id="day-drawer-backdrop" onclick="closeDayPage()"></div>
+
+  <button id="debug-toggle" onclick="document.getElementById('debug-panel').classList.toggle('visible')">🐛 Debug</button>
+  <div id="debug-panel"></div>
+
+</body>
+</html>
